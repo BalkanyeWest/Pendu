@@ -22,9 +22,10 @@ const Status = {
   Success: "success",
   Defeat: "defeat",
 };
-let word = "test";
+let wordToGuess = "test";
 let wordList = ["baguette", "frites"];
 let lettersGuessed = [];
+let wordsGuessed = [];
 let displayedWord = "";
 let displayedWordArray = [];
 let alphabet = "abcdefghijklmnopqrstuvwxyz";
@@ -60,6 +61,16 @@ settingsDiv.appendChild(replayGameButton);
 settingsDiv.appendChild(addWordButton);
 document.body.appendChild(settingsDiv);
 
+// check if element a contains element b
+function contains(arr, el) {
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i] == el) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // build the game keyboard
 function buildKeyboard() {
   for (var i = 0; i < 26; i++) {
@@ -71,9 +82,10 @@ function buildKeyboard() {
   }
 }
 
+// init the settings to display
 function initSettings() {
-  wordTryInputField.style.display = "none";
-  wordTryInputSubmit.style.display = "none";
+  wordTryButton.style.display = "block";
+  wordTryInputDiv.style.display = "none";
 }
 
 // inits all the elements of the game
@@ -88,12 +100,12 @@ function initGame() {
 
 // gets a random word from the pool
 function getRandomWord() {
-  word = wordList[Math.floor(Math.random() * wordList.length)];
+  wordToGuess = wordList[Math.floor(Math.random() * wordList.length)];
 }
 
 // creates an "empty" array for the letters to be tried
 function initWordArray() {
-  let wordLength = word.length;
+  let wordLength = wordToGuess.length;
   for (let i = 0; i < wordLength; i++) {
     displayedWordArray[i] = "_";
     emptyLettersLeft++;
@@ -121,28 +133,12 @@ function updateGameScreen(letter) {
 
 // updates the word with the letters tried so far
 function updateWordArray(letter) {
-  let wordLength = word.length;
+  let wordLength = wordToGuess.length;
   let letterFound = false;
-  // for (let i = 0; i < wordLength; i++) {
-  //   console.log("searching for letter : " + word[i]);
-  //   if (lettersGuessed.includes(word[i])) {
-  //     displayedWordArray[i] = word[i];
-  //     letterFound = true;
-  //     console.log("found !");
-  //   } else {
-  //     displayedWordArray[i] = "_";
-  //     emptyLettersLeft++;
-  //     console.log("not found");
-  //   }
-  // }
-  // if (letterFound == false) {
-  //   console.log("lettre pas trouvée");
-  //   triesLeft--;
-  // }
 
   for (let i = 0; i < wordLength; i++) {
     console.log("searching for letter : " + letter);
-    if (word[i] == letter) {
+    if (wordToGuess[i] == letter) {
       displayedWordArray[i] = letter;
       letterFound = true;
       console.log("found !");
@@ -184,11 +180,14 @@ function checkGameStatus() {
 }
 
 function gameOver() {
+  displayWordDiv.textContent = wordToGuess;
+  displayWord();
   displayEndGameMessage();
   playAgain();
 }
 
 function displayEndGameMessage() {
+  displayWord();
   let message;
   if (gameStatus == Status.Success) {
     message = "Félicitations ! Vous avez gagné ! Voulez-vous rejouer ?";
@@ -203,33 +202,37 @@ function playAgain() {
   // add button, on click we rebuild the game board
 }
 
-function isLetter(letter) {
-  for (let i = 0; i < alphabet.length; i++) {
-    if (alphabet[i] == letter) {
-      return true;
+function handleWordTry(wordGuessed) {
+  console.log("word " + wordGuessed + " tried");
+  if (wordGuessed == wordToGuess) {
+    gameStatus = Status.Success;
+    gameOver();
+  } else {
+    triesLeft--;
+    if (!contains(wordsGuessed, wordGuessed)) {
+      wordsGuessed.push(wordGuessed);
     }
   }
-  return false;
-}
-
-function handleWordTry(word) {
-  console.log("letter " + word);
 }
 
 // handle a letter being clicked through the displayed keyboard
 displayKeyboardDiv.addEventListener("click", (e) => {
   let letterClicked = e.target;
-  letterClicked.classList.add("tried"); // disable the button and grey out the CSS
-  letterClicked.disabled = true;
+  letterClicked.classList.add("tried"); // grey out the CSS
+  letterClicked.disabled = true; // disable the button
   updateGameScreen(letterClicked.id);
 });
 
 // handle a letter being typed through the user's physical keyboard
 document.addEventListener("keyup", (e) => {
-  if (document.activeElement != wordTryInputField && isLetter(e.key)) {
+  if (
+    document.activeElement != wordTryInputField &&
+    contains(alphabet, e.key)
+  ) {
+    // if textfield has focus and if input is a letter
     let letterClicked = document.querySelector("#" + e.key);
-    letterClicked.classList.add("tried"); // disable the button and grey out the CSS
-    letterClicked.disabled = true;
+    letterClicked.classList.add("tried"); // grey out the CSS
+    letterClicked.disabled = true; // disable button
     updateGameScreen(letterClicked.id);
   }
 });
@@ -238,12 +241,17 @@ document.addEventListener("keyup", (e) => {
 wordTryButton.addEventListener("click", (e) => {
   if (!wordTryInputDiv.hidden) {
     wordTryInputDiv.style.display = "block";
+    wordTryButton.style.display = "none";
   }
+  wordTryInputField.focus();
 });
 
 wordTryInputSubmit.addEventListener("click", (e) => {
-  console.log(wordTryInputField.value);
+  handleWordTry(wordTryInputField.value);
 });
 
 // main logic "loop"
 initGame();
+
+// TO DO
+// add a check on EVERY game update for the game status, to avoid negative lives left like I currently have
