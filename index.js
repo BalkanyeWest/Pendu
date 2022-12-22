@@ -6,6 +6,9 @@ let gameDiv = document.createElement("div");
 let displayHangmanDiv = document.createElement("div");
 let displayWordDiv = document.createElement("div");
 let displayKeyboardDiv = document.createElement("div");
+let listOfTriesDiv = document.createElement("div");
+let listOfWordsTriedDiv = document.createElement("div");
+let listOfLettersTriedDiv = document.createElement("div");
 let settingsDiv = document.createElement("div");
 let wordTryButton = document.createElement("button");
 let wordTryInputDiv = document.createElement("div");
@@ -22,13 +25,41 @@ const Status = {
   Success: "success",
   Defeat: "defeat",
 };
+const alphabetArray = [
+  "a",
+  "b",
+  "c",
+  "d",
+  "e",
+  "f",
+  "g",
+  "h",
+  "i",
+  "j",
+  "k",
+  "l",
+  "m",
+  "n",
+  "o",
+  "p",
+  "q",
+  "r",
+  "s",
+  "t",
+  "u",
+  "v",
+  "w",
+  "x",
+  "y",
+  "z",
+];
+const alphabetString = "abcdefghijklmnopqrstuvwxyz";
 let wordToGuess = "test";
 let wordList = ["baguette", "frites"];
 let lettersGuessed = [];
 let wordsGuessed = [];
 let displayedWord = "";
 let displayedWordArray = [];
-let alphabet = "abcdefghijklmnopqrstuvwxyz";
 let triesLeft = 7;
 let emptyLettersLeft = 0;
 let gameStatus = Status.Fresh;
@@ -42,6 +73,11 @@ gameDiv.classList.add("game");
 gameDiv.appendChild(displayHangmanDiv);
 gameDiv.appendChild(displayWordDiv);
 gameDiv.appendChild(displayKeyboardDiv);
+listOfLettersTriedDiv.textContent = "Liste des lettres essayées : ";
+listOfWordsTriedDiv.textContent = "Liste des mots essayés : ";
+listOfTriesDiv.appendChild(listOfLettersTriedDiv);
+listOfTriesDiv.appendChild(listOfWordsTriedDiv);
+gameDiv.appendChild(listOfTriesDiv);
 document.body.appendChild(gameDiv);
 
 // settings zone
@@ -61,13 +97,24 @@ settingsDiv.appendChild(replayGameButton);
 settingsDiv.appendChild(addWordButton);
 document.body.appendChild(settingsDiv);
 
-// check if element a contains element b
-function contains(arr, el) {
-  for (var i = 0; i < arr.length; i++) {
-    if (arr[i] == el) {
-      return true;
-    }
+// check if string contains element
+// function contains(str, el) {
+//   for (var i = 0; i < str.length; i++) {
+//     if (str[i] == el) {
+//       return true;
+//     }
+//   }
+//   return false;
+// }
+
+// checks for duplicate in array, if not adds the element to it
+function addNoDuplicate(arr, el) {
+  if (!arr.includes(el)) {
+    arr.push(el);
+    console.log("added " + el + " to " + arr);
+    return true;
   }
+  console.log("Duplicate detected ! " + el + " is already in " + arr);
   return false;
 }
 
@@ -76,8 +123,8 @@ function buildKeyboard() {
   for (var i = 0; i < 26; i++) {
     let button = document.createElement("button");
     button.classList.add("letter-button");
-    button.id = alphabet[i];
-    button.textContent = alphabet[i];
+    button.id = alphabetString[i];
+    button.textContent = alphabetString[i];
     displayKeyboardDiv.appendChild(button);
   }
 }
@@ -125,9 +172,14 @@ function displayWord() {
 
 // updates the game screen at each user input
 function updateGameScreen(letter) {
-  lettersGuessed.push(letter); // add the letter input to the list of letters already tried
-  updateWordArray(letter);
-  displayWord();
+  letter.classList.add("tried"); // grey out the CSS
+  letter.disabled = true; // disable button
+  if (addNoDuplicate(lettersGuessed, letter.id)) {
+    // add the letter input to the list of letters already tried
+    updateWordArray(letter.id);
+  }
+  listOfLettersTriedDiv.textContent =
+    "Liste des lettres essayées : " + lettersGuessed;
   checkGameStatus();
 }
 
@@ -203,37 +255,39 @@ function playAgain() {
 }
 
 function handleWordTry(wordGuessed) {
-  console.log("word " + wordGuessed + " tried");
   if (wordGuessed == wordToGuess) {
     gameStatus = Status.Success;
     gameOver();
   } else {
-    triesLeft--;
-    if (!contains(wordsGuessed, wordGuessed)) {
-      wordsGuessed.push(wordGuessed);
+    // if (!contains(wordsGuessed, wordGuessed)) {
+    //     wordsGuessed.push(wordGuessed);
+    //}
+    if (addNoDuplicate(wordsGuessed, wordGuessed)) {
+      // add the attempt to the list of words already tried
+      triesLeft--;
     }
+    listOfWordsTriedDiv.textContent =
+      "Liste des mots essayés : " + wordsGuessed;
+    checkGameStatus();
   }
 }
 
 // handle a letter being clicked through the displayed keyboard
 displayKeyboardDiv.addEventListener("click", (e) => {
   let letterClicked = e.target;
-  letterClicked.classList.add("tried"); // grey out the CSS
-  letterClicked.disabled = true; // disable the button
-  updateGameScreen(letterClicked.id);
+  updateGameScreen(letterClicked);
 });
 
 // handle a letter being typed through the user's physical keyboard
 document.addEventListener("keyup", (e) => {
   if (
     document.activeElement != wordTryInputField &&
-    contains(alphabet, e.key)
+    alphabetString.includes(e.key)
+    //contains(alphabet, e.key)
   ) {
     // if textfield has focus and if input is a letter
     let letterClicked = document.querySelector("#" + e.key);
-    letterClicked.classList.add("tried"); // grey out the CSS
-    letterClicked.disabled = true; // disable button
-    updateGameScreen(letterClicked.id);
+    updateGameScreen(letterClicked);
   }
 });
 
@@ -246,12 +300,28 @@ wordTryButton.addEventListener("click", (e) => {
   wordTryInputField.focus();
 });
 
+function handleWordInput() {
+  if (wordTryInputField.value != "") {
+    // handle word submission unless the field is empty
+    handleWordTry(wordTryInputField.value);
+    wordTryInputField.value = "";
+  }
+}
+
+// handle the user pressing enter after writing a word
+wordTryInputField.addEventListener("keyup", (e) => {
+  if (e.key === "Enter") {
+    handleWordInput();
+  }
+});
+
 wordTryInputSubmit.addEventListener("click", (e) => {
-  handleWordTry(wordTryInputField.value);
+  handleWordInput();
 });
 
 // main logic "loop"
 initGame();
 
 // TO DO
-// add a check on EVERY game update for the game status, to avoid negative lives left like I currently have
+// handle replay button
+// handle adding a word to the dictionary
