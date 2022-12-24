@@ -14,6 +14,7 @@ let wordTryButton = document.createElement("button");
 let wordTryInputDiv = document.createElement("div");
 let wordTryInputField = document.createElement("input");
 let wordTryInputSubmit = document.createElement("button");
+let endGameMessageDiv = document.createElement("div");
 let replayGameButton = document.createElement("button"); // hide it when game status is fresh or ongoing
 let addWordButton = document.createElement("button"); // hide it when game status is fresh or ongoing
 
@@ -93,6 +94,7 @@ wordTryInputDiv.appendChild(wordTryInputField);
 wordTryInputDiv.appendChild(wordTryInputSubmit);
 settingsDiv.appendChild(wordTryInputDiv);
 settingsDiv.appendChild(document.createElement("br"));
+settingsDiv.appendChild(endGameMessageDiv);
 settingsDiv.appendChild(replayGameButton);
 settingsDiv.appendChild(addWordButton);
 document.body.appendChild(settingsDiv);
@@ -148,6 +150,7 @@ function initGame() {
 // gets a random word from the pool
 function getRandomWord() {
   wordToGuess = wordList[Math.floor(Math.random() * wordList.length)];
+  console.log("word to guess : " + wordToGuess);
 }
 
 // creates an "empty" array for the letters to be tried
@@ -161,7 +164,9 @@ function initWordArray() {
     "word array initialized : " +
       displayedWordArray +
       ", empty letters left : " +
-      emptyLettersLeft
+      emptyLettersLeft +
+      ", letters tried : " +
+      lettersGuessed
   );
 }
 
@@ -178,8 +183,10 @@ function updateGameScreen(letter) {
     // add the letter input to the list of letters already tried
     updateWordArray(letter.id);
   }
+  console.log("letters guessed status in updateGamescreen : " + lettersGuessed);
   listOfLettersTriedDiv.textContent =
     "Liste des lettres essayées : " + lettersGuessed;
+  displayWord();
   checkGameStatus();
 }
 
@@ -235,7 +242,6 @@ function gameOver() {
   displayWordDiv.textContent = wordToGuess;
   displayWord();
   displayEndGameMessage();
-  playAgain();
 }
 
 function displayEndGameMessage() {
@@ -246,12 +252,41 @@ function displayEndGameMessage() {
   } else if (gameStatus == Status.Defeat) {
     message = "Dommage, vous avez perdu =( Voulez-vous rejouer ?";
   }
-  alert(message);
+  //alert(message);
+  endGameMessageDiv.textContent = message;
+  endGameMessageDiv.style.display = "block";
   // make a new div to display an end game message based on gameStatut
 }
 
+function purgeGameData() {
+  displayedWordArray.length = 0;
+  triesLeft = 7;
+  emptyLettersLeft = 0;
+  lettersGuessed = [];
+  wordsGuessed = [];
+  gameStatus = Status.Ongoing;
+  listOfLettersTriedDiv.textContent = "Liste des lettres essayées : ";
+  listOfWordsTriedDiv.textContent = "Liste des mots essayés : ";
+}
+
+function refreshKeyboard() {
+  const letters = document.querySelectorAll(".tried");
+
+  letters.forEach((letter) => {
+    letter.classList.remove("tried");
+    letter.disabled = false;
+  });
+}
+
 function playAgain() {
-  // add button, on click we rebuild the game board
+
+  purgeGameData();
+  initSettings();
+  getRandomWord();
+  initWordArray();
+  displayWord();
+  refreshKeyboard();
+
 }
 
 function handleWordTry(wordGuessed) {
@@ -272,34 +307,6 @@ function handleWordTry(wordGuessed) {
   }
 }
 
-// handle a letter being clicked through the displayed keyboard
-displayKeyboardDiv.addEventListener("click", (e) => {
-  let letterClicked = e.target;
-  updateGameScreen(letterClicked);
-});
-
-// handle a letter being typed through the user's physical keyboard
-document.addEventListener("keyup", (e) => {
-  if (
-    document.activeElement != wordTryInputField &&
-    alphabetString.includes(e.key)
-    //contains(alphabet, e.key)
-  ) {
-    // if textfield has focus and if input is a letter
-    let letterClicked = document.querySelector("#" + e.key);
-    updateGameScreen(letterClicked);
-  }
-});
-
-// handle the user wanting to submit a word
-wordTryButton.addEventListener("click", (e) => {
-  if (!wordTryInputDiv.hidden) {
-    wordTryInputDiv.style.display = "block";
-    wordTryButton.style.display = "none";
-  }
-  wordTryInputField.focus();
-});
-
 function handleWordInput() {
   if (wordTryInputField.value != "") {
     // handle word submission unless the field is empty
@@ -308,15 +315,59 @@ function handleWordInput() {
   }
 }
 
+// Event listeners
+
+// handle a letter being clicked through the displayed keyboard
+displayKeyboardDiv.addEventListener("click", (e) => {
+  if (gameStatus == Status.Ongoing) {
+    let letterClicked = e.target;
+    updateGameScreen(letterClicked);
+  }
+});
+
+// handle a letter being typed through the user's physical keyboard
+document.addEventListener("keyup", (e) => {
+  if (gameStatus == Status.Ongoing) {
+    if (
+      document.activeElement != wordTryInputField &&
+      alphabetString.includes(e.key)
+      //contains(alphabet, e.key)
+    ) {
+      // if textfield has focus and if input is a letter
+      let letterClicked = document.querySelector("#" + e.key);
+      updateGameScreen(letterClicked);
+    }
+  }
+});
+
+// handle the user wanting to submit a word
+wordTryButton.addEventListener("click", (e) => {
+  if (gameStatus == Status.Ongoing) {
+    if (!wordTryInputDiv.hidden) {
+      wordTryInputDiv.style.display = "block";
+      wordTryButton.style.display = "none";
+    }
+    wordTryInputField.focus();
+  }
+});
+
 // handle the user pressing enter after writing a word
 wordTryInputField.addEventListener("keyup", (e) => {
-  if (e.key === "Enter") {
-    handleWordInput();
+  if (gameStatus == Status.Ongoing) {
+    if (e.key === "Enter") {
+      handleWordInput();
+    }
   }
 });
 
 wordTryInputSubmit.addEventListener("click", (e) => {
-  handleWordInput();
+  if (gameStatus == Status.Ongoing) {
+    handleWordInput();
+  }
+});
+
+replayGameButton.addEventListener("click", (e) => {
+  playAgain();
 });
 
 // main logic "loop"
