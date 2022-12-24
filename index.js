@@ -15,8 +15,12 @@ let wordTryInputDiv = document.createElement("div");
 let wordTryInputField = document.createElement("input");
 let wordTryInputSubmit = document.createElement("button");
 let endGameMessageDiv = document.createElement("div");
-let replayGameButton = document.createElement("button"); // hide it when game status is fresh or ongoing
-let addWordButton = document.createElement("button"); // hide it when game status is fresh or ongoing
+let replayGameButton = document.createElement("button");
+let addWordButton = document.createElement("button");
+let addWordInputDiv = document.createElement("div");
+let addWordInputField = document.createElement("input");
+let addWordInputSubmit = document.createElement("button");
+let clearCookiesButton = document.createElement("button");
 
 // variables to handle JS game logic
 const Status = {
@@ -64,6 +68,7 @@ let displayedWordArray = [];
 let triesLeft = 7;
 let emptyLettersLeft = 0;
 let gameStatus = Status.Fresh;
+let wordsAddedByUser = [];
 
 // header
 header.textContent = "header";
@@ -96,7 +101,15 @@ settingsDiv.appendChild(wordTryInputDiv);
 settingsDiv.appendChild(document.createElement("br"));
 settingsDiv.appendChild(endGameMessageDiv);
 settingsDiv.appendChild(replayGameButton);
+addWordInputField.setAttribute("type", "text");
+addWordInputSubmit.setAttribute("type", "submit");
+addWordInputSubmit.textContent = "Ajouter";
 settingsDiv.appendChild(addWordButton);
+addWordInputDiv.appendChild(addWordInputField);
+addWordInputDiv.appendChild(addWordInputSubmit);
+settingsDiv.appendChild(addWordInputDiv);
+clearCookiesButton.textContent = "Vider les cookies";
+settingsDiv.appendChild(clearCookiesButton);
 document.body.appendChild(settingsDiv);
 
 // check if string contains element
@@ -135,6 +148,22 @@ function buildKeyboard() {
 function initSettings() {
   wordTryButton.style.display = "block";
   wordTryInputDiv.style.display = "none";
+  addWordButton.style.display = "block";
+  addWordInputDiv.style.display = "none";
+
+  // get words from user's cookies
+  let cookies = document.cookie;
+  console.log("content of cookies : " + cookies);
+  if (cookies.match(/^(.*;)?\s*words\s*=\s*[^;]+(.*)?$/)) {
+    console.log("Cookies contain words !");
+    cookies = cookies.slice(6); // if cookies exist, remove "words=" in front
+    wordsAddedByUser = cookies.slice(",");
+    console.log("list of words added by user : " + wordsAddedByUser);
+    wordList = [...wordList, ...wordsAddedByUser];
+    console.log("total list of words : " + wordList);
+  } else {
+    console.log("cookies are empty");
+  }
 }
 
 // inits all the elements of the game
@@ -149,6 +178,13 @@ function initGame() {
 
 // gets a random word from the pool
 function getRandomWord() {
+  console.log(
+    "list of possible words to guess : " +
+      wordList +
+      ", with " +
+      wordList.length +
+      " elements"
+  );
   wordToGuess = wordList[Math.floor(Math.random() * wordList.length)];
   console.log("word to guess : " + wordToGuess);
 }
@@ -279,14 +315,12 @@ function refreshKeyboard() {
 }
 
 function playAgain() {
-
   purgeGameData();
   initSettings();
   getRandomWord();
   initWordArray();
   displayWord();
   refreshKeyboard();
-
 }
 
 function handleWordTry(wordGuessed) {
@@ -307,11 +341,35 @@ function handleWordTry(wordGuessed) {
   }
 }
 
+// handle word try unless the field is empty
 function handleWordInput() {
   if (wordTryInputField.value != "") {
-    // handle word submission unless the field is empty
     handleWordTry(wordTryInputField.value);
     wordTryInputField.value = "";
+  }
+}
+
+function addWordToDictionary(newWord) {
+  wordsAddedByUser.push(newWord);
+  wordList.push(newWord);
+  document.cookie = "words=" + wordsAddedByUser;
+  console.log(
+    "word " +
+      newWord +
+      " added to dictionary, list of words added by user is " +
+      wordsAddedByUser +
+      "and complete list of words is " +
+      wordList
+  );
+}
+
+// handle new word submission to dictionary unless the field is empty
+function handleWordSubmission() {
+  console.log(addWordInputField.value);
+  if (addWordInputField.value != "") {
+    console.log("word is submitted : " + addWordInputField.value);
+    addWordToDictionary(addWordInputField.value);
+    addWordInputField.value = "";
   }
 }
 
@@ -330,10 +388,10 @@ document.addEventListener("keyup", (e) => {
   if (gameStatus == Status.Ongoing) {
     if (
       document.activeElement != wordTryInputField &&
+      document.activeElement != addWordInputField &&
       alphabetString.includes(e.key)
-      //contains(alphabet, e.key)
     ) {
-      // if textfield has focus and if input is a letter
+      // if focus isn't on the textfields and if input is a letter
       let letterClicked = document.querySelector("#" + e.key);
       updateGameScreen(letterClicked);
     }
@@ -341,7 +399,7 @@ document.addEventListener("keyup", (e) => {
 });
 
 // handle the user wanting to submit a word
-wordTryButton.addEventListener("click", (e) => {
+wordTryButton.addEventListener("click", () => {
   if (gameStatus == Status.Ongoing) {
     if (!wordTryInputDiv.hidden) {
       wordTryInputDiv.style.display = "block";
@@ -360,19 +418,47 @@ wordTryInputField.addEventListener("keyup", (e) => {
   }
 });
 
-wordTryInputSubmit.addEventListener("click", (e) => {
+// handle the user clicking on the submit button to try a word
+wordTryInputSubmit.addEventListener("click", () => {
   if (gameStatus == Status.Ongoing) {
     handleWordInput();
   }
 });
 
-replayGameButton.addEventListener("click", (e) => {
+// handle the replay button
+replayGameButton.addEventListener("click", () => {
   playAgain();
+});
+
+// handle the user wanting to add a word to dictionary
+addWordButton.addEventListener("click", () => {
+  if (!addWordInputDiv.hidden) {
+    addWordInputDiv.style.display = "block";
+    addWordButton.style.display = "none";
+  }
+  addWordInputField.focus();
+});
+
+// handle the user pressing enter after writing a word
+addWordInputField.addEventListener("keyup", (e) => {
+  if (e.key === "Enter") {
+    handleWordSubmission();
+  }
+});
+
+// handle the user clicking on the submit button to try a word
+addWordInputSubmit.addEventListener("click", () => {
+  handleWordSubmission();
+});
+
+clearCookiesButton.addEventListener("click", () => {
+  document.cookie = "words=";
+  console.log("cookies purged ! New cookie content : " + document.cookie);
 });
 
 // main logic "loop"
 initGame();
 
 // TO DO
-// handle replay button
 // handle adding a word to the dictionary
+// add button to purge cookie data
