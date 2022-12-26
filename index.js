@@ -59,8 +59,66 @@ const alphabetArray = [
   "z",
 ];
 const alphabetString = "abcdefghijklmnopqrstuvwxyz";
-let wordToGuess = "test";
-let wordList = ["baguette", "frites"];
+let wordList = [
+  "abondance",
+  "ananas",
+  "artichaut",
+  "asperge",
+  "aubergine",
+  "avocat",
+  "betterave",
+  "brocoli",
+  "cacahuète",
+  "camembert",
+  "canneberge",
+  "cannelle",
+  "carotte",
+  "cerise",
+  "champignon",
+  "chataigne",
+  "citrouille",
+  "clementine",
+  "concombre",
+  "coriandre",
+  "courgette",
+  "curcuma",
+  "endive",
+  "epinard",
+  "fenouil",
+  "fraise",
+  "framboise",
+  "gingembre",
+  "goyave",
+  "grenade",
+  "groseille",
+  "haricot",
+  "laitue",
+  "mandarine",
+  "mirabelle",
+  "moutarde",
+  "nectarine",
+  "oignon",
+  "orange",
+  "pamplemousse",
+  "paprika",
+  "pastèque",
+  "piment",
+  "pistache",
+  "poireau",
+  "poivron",
+  "potimarron",
+  "potiron",
+  "pruneau",
+  "raclette",
+  "rhubarbe",
+  "roquette",
+  "rutabaga",
+  "salade",
+  "tomate",
+  "topinambour",
+  "vanille",
+];
+let wordToGuess = "";
 let lettersGuessed = [];
 let wordsGuessed = [];
 let displayedWord = "";
@@ -77,7 +135,9 @@ document.body.appendChild(header);
 // game zone
 gameDiv.classList.add("game");
 gameDiv.appendChild(displayHangmanDiv);
+displayWordDiv.classList.add("displayed-word");
 gameDiv.appendChild(displayWordDiv);
+displayKeyboardDiv.classList.add("displayed-keyboard");
 gameDiv.appendChild(displayKeyboardDiv);
 listOfLettersTriedDiv.textContent = "Liste des lettres essayées : ";
 listOfWordsTriedDiv.textContent = "Liste des mots essayés : ";
@@ -157,7 +217,7 @@ function initSettings() {
   if (cookies.match(/^(.*;)?\s*words\s*=\s*[^;]+(.*)?$/)) {
     console.log("Cookies contain words !");
     cookies = cookies.slice(6); // if cookies exist, remove "words=" in front
-    wordsAddedByUser = cookies.slice(",");
+    wordsAddedByUser = cookies.split(",");
     console.log("list of words added by user : " + wordsAddedByUser);
     wordList = [...wordList, ...wordsAddedByUser];
     console.log("total list of words : " + wordList);
@@ -350,26 +410,32 @@ function handleWordInput() {
 }
 
 function addWordToDictionary(newWord) {
-  wordsAddedByUser.push(newWord);
-  wordList.push(newWord);
-  document.cookie = "words=" + wordsAddedByUser;
-  console.log(
-    "word " +
-      newWord +
-      " added to dictionary, list of words added by user is " +
-      wordsAddedByUser +
-      "and complete list of words is " +
-      wordList
-  );
+  if (!wordList.includes(newWord)) {
+    console.log("wordsAddedByUser object : " + typeof wordsAddedByUser);
+    wordsAddedByUser.push(newWord);
+    wordList.push(newWord);
+    document.cookie = "words=" + wordsAddedByUser;
+    console.log(
+      "word " +
+        newWord +
+        " added to dictionary, list of words added by user is " +
+        wordsAddedByUser +
+        "and complete list of words is " +
+        wordList
+    );
+  } else {
+    console.log("word submitted " + newWord + " is already in list");
+  }
 }
 
-// handle new word submission to dictionary unless the field is empty
+// handle new word submission to dictionary unless the field is empty or word too short
 function handleWordSubmission() {
-  console.log(addWordInputField.value);
-  if (addWordInputField.value != "") {
+  if (addWordInputField.value.length > 5) {
     console.log("word is submitted : " + addWordInputField.value);
     addWordToDictionary(addWordInputField.value);
     addWordInputField.value = "";
+  } else {
+    console.log("word is too short");
   }
 }
 
@@ -377,7 +443,7 @@ function handleWordSubmission() {
 
 // handle a letter being clicked through the displayed keyboard
 displayKeyboardDiv.addEventListener("click", (e) => {
-  if (gameStatus == Status.Ongoing) {
+  if (gameStatus == Status.Ongoing && e.target.nodeName == "BUTTON") {
     let letterClicked = e.target;
     updateGameScreen(letterClicked);
   }
@@ -460,5 +526,4 @@ clearCookiesButton.addEventListener("click", () => {
 initGame();
 
 // TO DO
-// handle adding a word to the dictionary
-// add button to purge cookie data
+// graphics
