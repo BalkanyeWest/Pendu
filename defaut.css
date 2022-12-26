@@ -1,6 +1,13 @@
-.game {
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.container {
+    padding-top: 50px;
     margin: 0 auto;
     width: 1000px;
+    display: flex;
+    flex-direction: column;
 }
 
 button .tried {
@@ -20,46 +27,53 @@ button .tried {
     background-color: white;
 }
 
-.displayed-word {
-    font-size: 1.2em;
+.letter-button:hover {
+    border: 1px solid #000000;
+}
+
+.letter-button:deactivated {
+    border: none;
+}
+
+.centered {
     margin: auto;
 }
 
-.displayed-keyboard {
+#displayed-word {
+    font-size: 1.2em;
+    margin: auto;
+    margin-bottom: 1em;
+    justify-content: center;
+}
+
+#displayed-keyboard {
     font-size: 1em;
     margin: auto;
+    margin-bottom: 1em;
+}
+
+#word-try {
+    width: 115px;
 }
 
 @media all and (max-width: 1000px) {
-    .displayed-keyboard {
-        display: block;
+    #displayed-keyboard {
+        display: flex;
     }
 
-    .game {
+    .container {
         width: 800px;
     }
 }
 
 @media all and (max-width: 850px) {
-    #photo_recette {
-        width: 100%;
-        display: block;
-    }
-
-    #colonne_droite {
-        width: 100%;
-        margin-left: 0;
-        margin-top: 15px;
-        display: block;
-    }
-
-    .game {
+    .container {
         width: 500px;
     }
 }
 
 @media all and (max-width: 550px) {
-    .game {
+    .container {
         width: 100%;
     }
 }

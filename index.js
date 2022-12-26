@@ -2,8 +2,8 @@
 
 // variables to generate the base HTML
 let header = document.createElement("header");
+// let hangmanDiv = document.createElement("div");
 let gameDiv = document.createElement("div");
-let displayHangmanDiv = document.createElement("div");
 let displayWordDiv = document.createElement("div");
 let displayKeyboardDiv = document.createElement("div");
 let listOfTriesDiv = document.createElement("div");
@@ -133,41 +133,59 @@ header.textContent = "header";
 document.body.appendChild(header);
 
 // game zone
-gameDiv.classList.add("game");
-gameDiv.appendChild(displayHangmanDiv);
-displayWordDiv.classList.add("displayed-word");
+gameDiv.id = "game";
+gameDiv.classList.add("container");
+displayWordDiv.id = "displayed-word";
+displayWordDiv.classList.add("centered");
 gameDiv.appendChild(displayWordDiv);
-displayKeyboardDiv.classList.add("displayed-keyboard");
+displayKeyboardDiv.id = "displayed-keyboard";
+displayKeyboardDiv.classList.add("centered");
 gameDiv.appendChild(displayKeyboardDiv);
 listOfLettersTriedDiv.textContent = "Liste des lettres essayées : ";
-listOfWordsTriedDiv.textContent = "Liste des mots essayés : ";
-listOfTriesDiv.appendChild(listOfLettersTriedDiv);
+// listOfWordsTriedDiv.textContent = "Liste des mots essayés : ";
+listOfWordsTriedDiv.textContent = "";
+listOfWordsTriedDiv.style.textDecoration = "line-through";
+listOfWordsTriedDiv.style.justifyContent = "center";
+// listOfTriesDiv.appendCnild(listOfLettersTriedDiv);
 listOfTriesDiv.appendChild(listOfWordsTriedDiv);
 gameDiv.appendChild(listOfTriesDiv);
 document.body.appendChild(gameDiv);
-
-// settings zone
-settingsDiv.classList.add("settings");
 wordTryButton.textContent = "Proposer un mot";
-replayGameButton.textContent = "Rejouer";
-addWordButton.textContent = "Ajouter un mot";
+wordTryButton.id = "word-try";
+wordTryButton.classList.add("centered");
 wordTryInputField.setAttribute("type", "text");
 wordTryInputSubmit.setAttribute("type", "submit");
 wordTryInputSubmit.textContent = "Ajouter";
-settingsDiv.appendChild(wordTryButton);
 wordTryInputDiv.appendChild(wordTryInputField);
 wordTryInputDiv.appendChild(wordTryInputSubmit);
-settingsDiv.appendChild(wordTryInputDiv);
-settingsDiv.appendChild(document.createElement("br"));
+wordTryInputDiv.id = "word-try-input";
+wordTryInputDiv.classList.add("centered");
+gameDiv.appendChild(wordTryButton);
+gameDiv.appendChild(wordTryInputDiv);
+
+// settings zone
+settingsDiv.id = "settings";
+settingsDiv.classList.add("container");
+endGameMessageDiv.id = "end-game-message";
+endGameMessageDiv.classList.add("centered");
 settingsDiv.appendChild(endGameMessageDiv);
+replayGameButton.id = "replay-game-button";
+replayGameButton.classList.add("centered");
+replayGameButton.textContent = "Rejouer";
 settingsDiv.appendChild(replayGameButton);
+addWordButton.id = "add-word-button";
+addWordButton.classList.add("centered");
+addWordButton.textContent = "Ajouter un mot";
 addWordInputField.setAttribute("type", "text");
 addWordInputSubmit.setAttribute("type", "submit");
 addWordInputSubmit.textContent = "Ajouter";
 settingsDiv.appendChild(addWordButton);
+addWordInputDiv.classList.add("centered");
 addWordInputDiv.appendChild(addWordInputField);
 addWordInputDiv.appendChild(addWordInputSubmit);
 settingsDiv.appendChild(addWordInputDiv);
+clearCookiesButton.id = "clear-cookies";
+clearCookiesButton.classList.add("centered");
 clearCookiesButton.textContent = "Vider les cookies";
 settingsDiv.appendChild(clearCookiesButton);
 document.body.appendChild(settingsDiv);
@@ -268,7 +286,7 @@ function initWordArray() {
 
 // displays the current word with the missing letters
 function displayWord() {
-  displayWordDiv.textContent = displayedWordArray.join("");
+  displayWordDiv.textContent = displayedWordArray.join(" ").toUpperCase();
 }
 
 // updates the game screen at each user input
@@ -344,9 +362,9 @@ function displayEndGameMessage() {
   displayWord();
   let message;
   if (gameStatus == Status.Success) {
-    message = "Félicitations ! Vous avez gagné ! Voulez-vous rejouer ?";
+    message = "Félicitations ! Vous avez gagné !";
   } else if (gameStatus == Status.Defeat) {
-    message = "Dommage, vous avez perdu =( Voulez-vous rejouer ?";
+    message = "Dommage, vous avez perdu =(";
   }
   //alert(message);
   endGameMessageDiv.textContent = message;
@@ -362,7 +380,8 @@ function purgeGameData() {
   wordsGuessed = [];
   gameStatus = Status.Ongoing;
   listOfLettersTriedDiv.textContent = "Liste des lettres essayées : ";
-  listOfWordsTriedDiv.textContent = "Liste des mots essayés : ";
+  // listOfWordsTriedDiv.textContent = "Liste des mots essayés : ";
+  listOfWordsTriedDiv.textContent = "";
 }
 
 function refreshKeyboard() {
@@ -395,8 +414,8 @@ function handleWordTry(wordGuessed) {
       // add the attempt to the list of words already tried
       triesLeft--;
     }
-    listOfWordsTriedDiv.textContent =
-      "Liste des mots essayés : " + wordsGuessed;
+    // listOfWordsTriedDiv.textContent = "Liste des mots essayés : " + wordsGuessed;
+    listOfWordsTriedDiv.textContent = wordsGuessed.join(" ").toUpperCase();
     checkGameStatus();
   }
 }
@@ -404,7 +423,7 @@ function handleWordTry(wordGuessed) {
 // handle word try unless the field is empty
 function handleWordInput() {
   if (wordTryInputField.value != "") {
-    handleWordTry(wordTryInputField.value);
+    handleWordTry(wordTryInputField.value.toLowerCase());
     wordTryInputField.value = "";
   }
 }
@@ -526,4 +545,4 @@ clearCookiesButton.addEventListener("click", () => {
 initGame();
 
 // TO DO
-// graphics
+// graphics in hangmanDiv
