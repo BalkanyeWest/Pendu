@@ -2,13 +2,13 @@
 
 // variables to generate the base HTML
 let header = document.createElement("header");
-// let hangmanDiv = document.createElement("div");
+let hangmanCanvas = document.createElement("canvas");
 let gameDiv = document.createElement("div");
 let displayWordDiv = document.createElement("div");
 let displayKeyboardDiv = document.createElement("div");
 let listOfTriesDiv = document.createElement("div");
 let listOfWordsTriedDiv = document.createElement("div");
-let listOfLettersTriedDiv = document.createElement("div");
+// let listOfLettersTriedDiv = document.createElement("div");
 let settingsDiv = document.createElement("div");
 let wordTryButton = document.createElement("button");
 let wordTryInputDiv = document.createElement("div");
@@ -118,12 +118,13 @@ let wordList = [
   "topinambour",
   "vanille",
 ];
+let TOTAL_TRIES = 9;
 let wordToGuess = "";
 let lettersGuessed = [];
 let wordsGuessed = [];
 let displayedWord = "";
 let displayedWordArray = [];
-let triesLeft = 7;
+let triesLeft = TOTAL_TRIES;
 let emptyLettersLeft = 0;
 let gameStatus = Status.Fresh;
 let wordsAddedByUser = [];
@@ -131,6 +132,12 @@ let wordsAddedByUser = [];
 // header
 header.textContent = "header";
 document.body.appendChild(header);
+
+// hangman drawing zone
+hangmanCanvas.id = "hangman";
+hangmanCanvas.width = "300";
+hangmanCanvas.height = "300";
+document.body.appendChild(hangmanCanvas);
 
 // game zone
 gameDiv.id = "game";
@@ -141,8 +148,7 @@ gameDiv.appendChild(displayWordDiv);
 displayKeyboardDiv.id = "displayed-keyboard";
 displayKeyboardDiv.classList.add("centered");
 gameDiv.appendChild(displayKeyboardDiv);
-listOfLettersTriedDiv.textContent = "Liste des lettres essayées : ";
-// listOfWordsTriedDiv.textContent = "Liste des mots essayés : ";
+// listOfLettersTriedDiv.textContent = "Liste des lettres essayées : ";
 listOfWordsTriedDiv.textContent = "";
 listOfWordsTriedDiv.style.textDecoration = "line-through";
 listOfWordsTriedDiv.style.justifyContent = "center";
@@ -190,24 +196,112 @@ clearCookiesButton.textContent = "Vider les cookies";
 settingsDiv.appendChild(clearCookiesButton);
 document.body.appendChild(settingsDiv);
 
-// check if string contains element
-// function contains(str, el) {
-//   for (var i = 0; i < str.length; i++) {
-//     if (str[i] == el) {
-//       return true;
-//     }
-//   }
-//   return false;
+// canvas management functions for drawing the hangman
+/** @type {HTMLCanvasElement} */
+function initCanvas() {
+  // let hangmanContext = hangmanCanvas.getContext("2d");
+
+  hangmanContext.beginPath();
+  hangmanContext.fillStyle = "#ffffff";
+  hangmanContext.lineWidth = 2;
+}
+
+// function resetCanvas() {
+//   let hangmanContext = hangmanCanvas.getContext("2d");
+//   hangmanContext.clearRect(0, 0, 400, 400);
 // }
+
+function draw(startX, startY, endX, endY) {
+  // let hangmanContext = hangmanCanvas.getContext("2d");
+  hangmanContext.beginPath();
+  hangmanContext.moveTo(startX, startY);
+  hangmanContext.lineTo(endX, endY);
+  hangmanContext.stroke();
+}
+
+const base1 = function () {
+  console.log("drawing base1");
+  draw(0, 150, 150, 150);
+};
+
+const base2 = function () {
+  console.log("drawing base2");
+  draw(10, 0, 10, 600);
+};
+
+const base3 = function () {
+  console.log("drawing base3");
+  draw(0, 5, 70, 5);
+};
+
+const base4 = function () {
+  console.log("drawing base4");
+  draw(60, 5, 60, 15);
+};
+const head = function () {
+  // let hangmanContext = hangmanCanvas.getContext("2d");
+  hangmanContext.beginPath();
+  hangmanContext.arc(60, 25, 10, 0, Math.PI * 2, false);
+  hangmanContext.stroke();
+};
+
+const torso = function () {
+  console.log("drawing torso");
+  draw(60, 36, 60, 70);
+};
+
+const rightArm = function () {
+  console.log("drawing right arm");
+  draw(60, 46, 100, 50);
+};
+
+const leftArm = function () {
+  console.log("drawing left arm");
+  draw(60, 46, 20, 50);
+};
+
+const rightLeg = function () {
+  console.log("drawing right leg");
+  draw(60, 70, 100, 100);
+};
+
+const leftLeg = function () {
+  console.log("drawing left leg");
+  draw(60, 70, 20, 100);
+};
+
+// const drawArray = [
+//   base1,
+//   base2,
+//   base3,
+//   base4,
+//   head,
+//   torso,
+//   leftArm,
+//   rightArm,
+//   leftLeg,
+//   rightLeg,
+// ];
+
+const drawArray = [
+  rightLeg,
+  leftLeg,
+  rightArm,
+  leftArm,
+  torso,
+  head,
+  base4,
+  base3,
+  base2,
+  base1,
+];
 
 // checks for duplicate in array, if not adds the element to it
 function addNoDuplicate(arr, el) {
   if (!arr.includes(el)) {
     arr.push(el);
-    console.log("added " + el + " to " + arr);
     return true;
   }
-  console.log("Duplicate detected ! " + el + " is already in " + arr);
   return false;
 }
 
@@ -231,22 +325,17 @@ function initSettings() {
 
   // get words from user's cookies
   let cookies = document.cookie;
-  console.log("content of cookies : " + cookies);
   if (cookies.match(/^(.*;)?\s*words\s*=\s*[^;]+(.*)?$/)) {
-    console.log("Cookies contain words !");
     cookies = cookies.slice(6); // if cookies exist, remove "words=" in front
     wordsAddedByUser = cookies.split(",");
-    console.log("list of words added by user : " + wordsAddedByUser);
     wordList = [...wordList, ...wordsAddedByUser];
-    console.log("total list of words : " + wordList);
-  } else {
-    console.log("cookies are empty");
   }
 }
 
 // inits all the elements of the game
 function initGame() {
   gameStatus = Status.Ongoing;
+  initCanvas();
   initSettings();
   getRandomWord();
   initWordArray();
@@ -256,15 +345,7 @@ function initGame() {
 
 // gets a random word from the pool
 function getRandomWord() {
-  console.log(
-    "list of possible words to guess : " +
-      wordList +
-      ", with " +
-      wordList.length +
-      " elements"
-  );
   wordToGuess = wordList[Math.floor(Math.random() * wordList.length)];
-  console.log("word to guess : " + wordToGuess);
 }
 
 // creates an "empty" array for the letters to be tried
@@ -274,14 +355,6 @@ function initWordArray() {
     displayedWordArray[i] = "_";
     emptyLettersLeft++;
   }
-  console.log(
-    "word array initialized : " +
-      displayedWordArray +
-      ", empty letters left : " +
-      emptyLettersLeft +
-      ", letters tried : " +
-      lettersGuessed
-  );
 }
 
 // displays the current word with the missing letters
@@ -297,10 +370,9 @@ function updateGameScreen(letter) {
     // add the letter input to the list of letters already tried
     updateWordArray(letter.id);
   }
-  console.log("letters guessed status in updateGamescreen : " + lettersGuessed);
-  listOfLettersTriedDiv.textContent =
-    "Liste des lettres essayées : " + lettersGuessed;
+  // listOfLettersTriedDiv.textContent = "Liste des lettres essayées : " + lettersGuessed;
   displayWord();
+  updateDrawing();
   checkGameStatus();
 }
 
@@ -310,22 +382,20 @@ function updateWordArray(letter) {
   let letterFound = false;
 
   for (let i = 0; i < wordLength; i++) {
-    console.log("searching for letter : " + letter);
     if (wordToGuess[i] == letter) {
       displayedWordArray[i] = letter;
       letterFound = true;
-      console.log("found !");
-    } else {
-      // displayedWordArray[i] = "_";
-      // emptyLettersLeft++;
-      // console.log("not found");
     }
   }
   if (letterFound == false) {
-    console.log("lettre pas trouvée");
     triesLeft--;
   }
-  console.log("current status of guess : " + displayedWordArray);
+}
+
+function updateDrawing() {
+  for (let i = TOTAL_TRIES; i > triesLeft; i--) {
+    drawArray[i]();
+  }
 }
 
 // checks if the word is guessed or if the hangman is dead
@@ -335,19 +405,13 @@ function checkGameStatus() {
   for (let i = 0; i < displayedWordArray.length; i++) {
     if (displayedWordArray[i] == "_") emptyLettersLeft++;
   }
-
-  console.log(
-    "lettres manquantes : " +
-      emptyLettersLeft +
-      ", essais restants : " +
-      triesLeft
-  );
   if (emptyLettersLeft == 0) {
     gameStatus = Status.Success;
     gameOver();
   }
   if (triesLeft == 0) {
     gameStatus = Status.Defeat;
+    updateDrawing();
     gameOver();
   }
 }
@@ -366,27 +430,24 @@ function displayEndGameMessage() {
   } else if (gameStatus == Status.Defeat) {
     message = "Dommage, vous avez perdu =(";
   }
-  //alert(message);
   endGameMessageDiv.textContent = message;
   endGameMessageDiv.style.display = "block";
-  // make a new div to display an end game message based on gameStatut
 }
 
 function purgeGameData() {
   displayedWordArray.length = 0;
-  triesLeft = 7;
+  triesLeft = TOTAL_TRIES;
   emptyLettersLeft = 0;
   lettersGuessed = [];
   wordsGuessed = [];
   gameStatus = Status.Ongoing;
-  listOfLettersTriedDiv.textContent = "Liste des lettres essayées : ";
-  // listOfWordsTriedDiv.textContent = "Liste des mots essayés : ";
+  // listOfLettersTriedDiv.textContent = "Liste des lettres essayées : ";
   listOfWordsTriedDiv.textContent = "";
 }
 
+// reactivate every disabled keys
 function refreshKeyboard() {
   const letters = document.querySelectorAll(".tried");
-
   letters.forEach((letter) => {
     letter.classList.remove("tried");
     letter.disabled = false;
@@ -395,6 +456,7 @@ function refreshKeyboard() {
 
 function playAgain() {
   purgeGameData();
+  resetCanvas();
   initSettings();
   getRandomWord();
   initWordArray();
@@ -407,14 +469,10 @@ function handleWordTry(wordGuessed) {
     gameStatus = Status.Success;
     gameOver();
   } else {
-    // if (!contains(wordsGuessed, wordGuessed)) {
-    //     wordsGuessed.push(wordGuessed);
-    //}
     if (addNoDuplicate(wordsGuessed, wordGuessed)) {
       // add the attempt to the list of words already tried
       triesLeft--;
     }
-    // listOfWordsTriedDiv.textContent = "Liste des mots essayés : " + wordsGuessed;
     listOfWordsTriedDiv.textContent = wordsGuessed.join(" ").toUpperCase();
     checkGameStatus();
   }
@@ -430,31 +488,17 @@ function handleWordInput() {
 
 function addWordToDictionary(newWord) {
   if (!wordList.includes(newWord)) {
-    console.log("wordsAddedByUser object : " + typeof wordsAddedByUser);
     wordsAddedByUser.push(newWord);
     wordList.push(newWord);
     document.cookie = "words=" + wordsAddedByUser;
-    console.log(
-      "word " +
-        newWord +
-        " added to dictionary, list of words added by user is " +
-        wordsAddedByUser +
-        "and complete list of words is " +
-        wordList
-    );
-  } else {
-    console.log("word submitted " + newWord + " is already in list");
   }
 }
 
 // handle new word submission to dictionary unless the field is empty or word too short
 function handleWordSubmission() {
   if (addWordInputField.value.length > 5) {
-    console.log("word is submitted : " + addWordInputField.value);
     addWordToDictionary(addWordInputField.value);
     addWordInputField.value = "";
-  } else {
-    console.log("word is too short");
   }
 }
 
@@ -536,13 +580,20 @@ addWordInputSubmit.addEventListener("click", () => {
   handleWordSubmission();
 });
 
+// handle the user emptying the cookies
 clearCookiesButton.addEventListener("click", () => {
   document.cookie = "words=";
-  console.log("cookies purged ! New cookie content : " + document.cookie);
 });
 
 // main logic "loop"
+let hangmanContext = hangmanCanvas.getContext("2d");
+
 initGame();
 
+head();
 // TO DO
-// graphics in hangmanDiv
+// improve game settings
+// add word pool API
+// add selection of word pools to merge together
+// add language management in settings
+// add dark mode
