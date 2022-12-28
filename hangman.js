@@ -2,6 +2,14 @@
 
 // variables to generate the base HTML
 let header = document.createElement("header");
+let headerDiv = document.createElement("div");
+let logoDiv = document.createElement("div");
+let headerNav = document.createElement("nav");
+let headerNavList = document.createElement("ul");
+let headerNavListAccueil = document.createElement("li");
+let accueilLink = document.createElement("a");
+let headerNavListContact = document.createElement("li");
+let contactLink = document.createElement("a");
 let hangmanDiv = document.createElement("div");
 let hangmanCanvas = document.createElement("canvas");
 let hangmanScore = document.createElement("div");
@@ -10,7 +18,6 @@ let displayWordDiv = document.createElement("div");
 let displayKeyboardDiv = document.createElement("div");
 let listOfTriesDiv = document.createElement("div");
 let listOfWordsTriedDiv = document.createElement("div");
-// let listOfLettersTriedDiv = document.createElement("div");
 let settingsDiv = document.createElement("div");
 let wordTryButton = document.createElement("button");
 let wordTryInputDiv = document.createElement("div");
@@ -23,6 +30,8 @@ let addWordInputDiv = document.createElement("div");
 let addWordInputField = document.createElement("input");
 let addWordInputSubmit = document.createElement("button");
 let clearCookiesButton = document.createElement("button");
+let footer = document.createElement("footer");
+let footerDiv = document.createElement("div");
 
 // variables to handle JS game logic
 const Status = {
@@ -132,7 +141,21 @@ let gameStatus = Status.Fresh;
 let wordsAddedByUser = [];
 
 // header
-header.textContent = "header";
+headerDiv.id = "flex-header";
+logoDiv.id = "logo";
+logoDiv.textContent = "Mahrez BENDALI";
+accueilLink.textContent = "Accueil";
+accueilLink.setAttribute("href", "../index.html");
+contactLink.textContent = "Contactez-moi";
+contactLink.setAttribute("href", "mailto:mahrez.bendali@gmail.com");
+headerNavListAccueil.appendChild(accueilLink);
+headerNavList.appendChild(headerNavListAccueil);
+headerNavListContact.appendChild(contactLink);
+headerNavList.appendChild(headerNavListContact);
+headerNav.appendChild(headerNavList);
+headerDiv.appendChild(logoDiv);
+headerDiv.appendChild(headerNav);
+header.appendChild(headerDiv);
 document.body.appendChild(header);
 
 // hangman drawing zone
@@ -153,11 +176,9 @@ gameDiv.appendChild(displayWordDiv);
 displayKeyboardDiv.id = "displayed-keyboard";
 displayKeyboardDiv.classList.add("centered");
 gameDiv.appendChild(displayKeyboardDiv);
-// listOfLettersTriedDiv.textContent = "Liste des lettres essayées : ";
 listOfWordsTriedDiv.textContent = "";
 listOfWordsTriedDiv.style.textDecoration = "line-through";
 listOfWordsTriedDiv.style.justifyContent = "center";
-// listOfTriesDiv.appendCnild(listOfLettersTriedDiv);
 listOfTriesDiv.appendChild(listOfWordsTriedDiv);
 gameDiv.appendChild(listOfTriesDiv);
 document.body.appendChild(gameDiv);
@@ -201,11 +222,15 @@ clearCookiesButton.textContent = "Vider les cookies";
 settingsDiv.appendChild(clearCookiesButton);
 document.body.appendChild(settingsDiv);
 
+//footer
+footerDiv.id = "footer-div";
+footerDiv.textContent = "© Mahrez Bendali";
+footer.appendChild(footerDiv);
+document.body.appendChild(footer);
+
 // canvas management functions for drawing the hangman
 /** @type {HTMLCanvasElement} */
 function initCanvas() {
-  // let hangmanContext = hangmanCanvas.getContext("2d");
-
   hangmanContext.beginPath();
   hangmanContext.fillStyle = "#ffffff";
   hangmanContext.lineWidth = 2;
@@ -217,7 +242,6 @@ function resetCanvas() {
 }
 
 function draw(startX, startY, endX, endY) {
-  // let hangmanContext = hangmanCanvas.getContext("2d");
   hangmanContext.beginPath();
   hangmanContext.moveTo(startX, startY);
   hangmanContext.lineTo(endX, endY);
@@ -225,68 +249,45 @@ function draw(startX, startY, endX, endY) {
 }
 
 const base1 = function () {
-  console.log("drawing base1");
   draw(0, 150, 150, 150);
 };
 
 const base2 = function () {
-  console.log("drawing base2");
   draw(10, 0, 10, 600);
 };
 
 const base3 = function () {
-  console.log("drawing base3");
   draw(0, 5, 70, 5);
 };
 
 const base4 = function () {
-  console.log("drawing base4");
   draw(60, 5, 60, 15);
 };
 const head = function () {
-  // let hangmanContext = hangmanCanvas.getContext("2d");
   hangmanContext.beginPath();
   hangmanContext.arc(60, 25, 10, 0, Math.PI * 2, false);
   hangmanContext.stroke();
 };
 
 const torso = function () {
-  console.log("drawing torso");
   draw(60, 36, 60, 70);
 };
 
 const rightArm = function () {
-  console.log("drawing right arm");
   draw(60, 46, 100, 50);
 };
 
 const leftArm = function () {
-  console.log("drawing left arm");
   draw(60, 46, 20, 50);
 };
 
 const rightLeg = function () {
-  console.log("drawing right leg");
   draw(60, 70, 100, 100);
 };
 
 const leftLeg = function () {
-  console.log("drawing left leg");
   draw(60, 70, 20, 100);
 };
-
-// const drawArray = [
-//   base1,
-//   base2,
-//   base3,
-//   base4,
-//   head,
-//   torso,
-//   leftArm,
-//   rightArm,
-//   leftLeg,
-//   rightLeg,
-// ];
 
 const drawArray = [
   rightLeg,
@@ -301,7 +302,7 @@ const drawArray = [
   base1,
 ];
 
-// checks for duplicate in array, if not adds the element to it
+// checks for duplicate in array, if none found adds the element to it
 function addNoDuplicate(arr, el) {
   if (!arr.includes(el)) {
     arr.push(el);
@@ -375,7 +376,6 @@ function updateGameScreen(letter) {
     // add the letter input to the list of letters already tried
     updateWordArray(letter.id);
   }
-  // listOfLettersTriedDiv.textContent = "Liste des lettres essayées : " + lettersGuessed;
   displayWord();
   updateHangmanCanvas();
   checkGameStatus();
@@ -447,7 +447,6 @@ function purgeGameData() {
   lettersGuessed = [];
   wordsGuessed = [];
   gameStatus = Status.Ongoing;
-  // listOfLettersTriedDiv.textContent = "Liste des lettres essayées : ";
   listOfWordsTriedDiv.textContent = "";
   endGameMessageDiv.textContent = "";
 }
