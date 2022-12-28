@@ -4,6 +4,7 @@
 let header = document.createElement("header");
 let hangmanDiv = document.createElement("div");
 let hangmanCanvas = document.createElement("canvas");
+let hangmanScore = document.createElement("div");
 let gameDiv = document.createElement("div");
 let displayWordDiv = document.createElement("div");
 let displayKeyboardDiv = document.createElement("div");
@@ -135,8 +136,11 @@ header.textContent = "header";
 document.body.appendChild(header);
 
 // hangman drawing zone
-hangmanCanvas.id = "hangman";
+hangmanCanvas.id = "canvas";
 hangmanDiv.appendChild(hangmanCanvas);
+hangmanScore.id = "score";
+hangmanScore.innerText = "Essais restants : " + triesLeft;
+hangmanDiv.appendChild(hangmanScore);
 hangmanDiv.id = "hangmanDiv";
 document.body.appendChild(hangmanDiv);
 
@@ -207,10 +211,10 @@ function initCanvas() {
   hangmanContext.lineWidth = 2;
 }
 
-// function resetCanvas() {
-//   let hangmanContext = hangmanCanvas.getContext("2d");
-//   hangmanContext.clearRect(0, 0, 400, 400);
-// }
+function resetCanvas() {
+  let hangmanContext = hangmanCanvas.getContext("2d");
+  hangmanContext.clearRect(0, 0, 400, 400);
+}
 
 function draw(startX, startY, endX, endY) {
   // let hangmanContext = hangmanCanvas.getContext("2d");
@@ -373,7 +377,7 @@ function updateGameScreen(letter) {
   }
   // listOfLettersTriedDiv.textContent = "Liste des lettres essayées : " + lettersGuessed;
   displayWord();
-  updateDrawing();
+  updateHangmanCanvas();
   checkGameStatus();
 }
 
@@ -393,10 +397,11 @@ function updateWordArray(letter) {
   }
 }
 
-function updateDrawing() {
+function updateHangmanCanvas() {
   for (let i = TOTAL_TRIES; i > triesLeft; i--) {
     drawArray[i - 1]();
   }
+  hangmanScore.innerText = "Essais restants : " + triesLeft;
 }
 
 // checks if the word is guessed or if the hangman is dead
@@ -412,7 +417,7 @@ function checkGameStatus() {
   }
   if (triesLeft == 0) {
     gameStatus = Status.Defeat;
-    updateDrawing();
+    updateHangmanCanvas();
     gameOver();
   }
 }
@@ -444,6 +449,7 @@ function purgeGameData() {
   gameStatus = Status.Ongoing;
   // listOfLettersTriedDiv.textContent = "Liste des lettres essayées : ";
   listOfWordsTriedDiv.textContent = "";
+  endGameMessageDiv.textContent = "";
 }
 
 // reactivate every disabled keys
@@ -588,7 +594,6 @@ clearCookiesButton.addEventListener("click", () => {
 
 // main logic "loop"
 let hangmanContext = hangmanCanvas.getContext("2d");
-
 initGame();
 
 // TO DO

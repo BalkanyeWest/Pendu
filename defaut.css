@@ -6,11 +6,16 @@ body {
 canvas {
     color: #ffffff;
     border: #ffffff dashed;
+    margin-left: 150px;
+}
+
+#score {
+    display: none;
 }
 
 #hangmanDiv {
-    margin: auto;
     text-align: center;
+    padding-top: 30px;
 }
 
 .container {
@@ -79,4 +84,9 @@ button .tried {
     canvas {
         display: none;
     }
+
+    #score {
+        display: block;
+    }
+
 }
