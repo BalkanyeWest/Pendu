@@ -54,9 +54,9 @@ This game is made using HTML/CSS/JS. All of the game logic is in the index.js fi
 
 ## Jouer ! / Play !
 
-Le lien pour jouer est trouvable sur mon portfolio
+Le lien pour jouer est trouvable sur [mon portfolio](https://mahrezbendali.fr/projets/hangman.html)
 
-The link to play the game can be found in my portfolio
+The link to play the game can be found in [my portfolio](https://mahrezbendali.fr/projets/hangman.html)
 
 ---
 
