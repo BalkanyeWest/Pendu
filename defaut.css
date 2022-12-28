@@ -8,6 +8,11 @@ canvas {
     border: #ffffff dashed;
 }
 
+#hangmanDiv {
+    margin: auto;
+    text-align: center;
+}
+
 .container {
     padding-top: 50px;
     margin: 0 auto;

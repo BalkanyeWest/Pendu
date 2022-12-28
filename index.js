@@ -2,6 +2,7 @@
 
 // variables to generate the base HTML
 let header = document.createElement("header");
+let hangmanDiv = document.createElement("div");
 let hangmanCanvas = document.createElement("canvas");
 let gameDiv = document.createElement("div");
 let displayWordDiv = document.createElement("div");
@@ -118,7 +119,7 @@ let wordList = [
   "topinambour",
   "vanille",
 ];
-let TOTAL_TRIES = 9;
+let TOTAL_TRIES = 10;
 let wordToGuess = "";
 let lettersGuessed = [];
 let wordsGuessed = [];
@@ -135,9 +136,9 @@ document.body.appendChild(header);
 
 // hangman drawing zone
 hangmanCanvas.id = "hangman";
-hangmanCanvas.width = "300";
-hangmanCanvas.height = "300";
-document.body.appendChild(hangmanCanvas);
+hangmanDiv.appendChild(hangmanCanvas);
+hangmanDiv.id = "hangmanDiv";
+document.body.appendChild(hangmanDiv);
 
 // game zone
 gameDiv.id = "game";
@@ -394,7 +395,7 @@ function updateWordArray(letter) {
 
 function updateDrawing() {
   for (let i = TOTAL_TRIES; i > triesLeft; i--) {
-    drawArray[i]();
+    drawArray[i - 1]();
   }
 }
 
@@ -590,7 +591,6 @@ let hangmanContext = hangmanCanvas.getContext("2d");
 
 initGame();
 
-head();
 // TO DO
 // improve game settings
 // add word pool API

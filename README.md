@@ -34,6 +34,7 @@ This game is made using HTML/CSS/JS. All of the game logic is in the index.js fi
 
 ## Reste à faire / To do list
 
+- [ ] améliorer la propreté du rendu du canvas JS
 - [ ] améliorer l'expérience utilisateur (par ex. rendre le message de fin de partie plus joli)
 - [ ] ajouter un mode sombre
 - [ ] créer une API dictionnaire, avec différents endpoints pour faire des thématiques de mots différentes (films, plantes, villes, animaux, Pokémon, etc)
@@ -41,6 +42,7 @@ This game is made using HTML/CSS/JS. All of the game logic is in the index.js fi
 - [ ] améliorer le niveau de paramétrage du jeu (par exemple choix du nombre de vies)
 - [ ] ajouter un compteur de victoires à la suite
 
+- [ ] improve neatness of the JS canvas rendering
 - [ ] improve user experience (i.e. make the end game message prettier)
 - [ ] add a dark mode
 - [ ] create a dictionary API, with different endpoints to have different word pool themes (movies, plants, cities, animals, Pokémon, etc)
